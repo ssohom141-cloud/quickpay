@@ -489,21 +489,31 @@ operatorSelect.parentElement.style.display = 'block';
 
         // Handle Form Submission (Simulating Payment)
         function handlePayment(e) {
-            e.preventDefault();
-            
-            // UI changes for loading state
-            payText.style.display = 'none';
-            payLoader.style.display = 'block';
-            payButton.disabled = true;
-            payButton.classList.add('opacity-75', 'cursor-not-allowed');
+    e.preventDefault();
 
-            // Simulate API call/processing time
-            setTimeout(() => {
-                // Hide form, show success
-                paymentForm.style.display = 'none';
-                successState.style.display = 'block';
-                document.querySelector('.success-checkmark').style.display = 'block';
-            }, 1500);
+    // UI changes for loading state
+    payText.style.display = 'none';
+    payLoader.style.display = 'block';
+    payButton.disabled = true;
+    payButton.classList.add('opacity-75', 'cursor-not-allowed');
+
+    // =========================================
+    // PAYMENT GATEWAY API CONFIGURATION
+    // Add your Razorpay / Cashfree / PhonePe API Keys here
+    // Contact developer to enable auto recharge
+    // =========================================
+    const API_KEY = "YOUR_API_KEY_HERE"; 
+    const API_SECRET = "YOUR_API_SECRET_HERE";
+    
+    // Example: fetch('https://api.razorpay.com/v1/payments', { ... })
+
+    // Simulate API call/processing time
+    setTimeout(() => {
+        // Hide form, show success
+        paymentForm.style.display = 'none';
+        successState.style.display = 'block';
+        document.querySelector('.success-checkmark').style.display = 'block';
+    }, 1500);
         }
 
         // Copy Code Functionality
