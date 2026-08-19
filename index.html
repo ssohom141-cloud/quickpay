@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPay - Recharge & Bill Payments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .service-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.2), 0 8px 10px -6px rgba(59, 130, 246, 0.1);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .pulse-icon {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease-out;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* Loader */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3b82f6;
+            width: 30px;
+            height: 30px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-checkmark {
+            display: none;
+            color: #10B981;
+            font-size: 3rem;
+            text-align: center;
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative">
+    
+    <!-- Navbar -->
+    <nav class="glass-effect fixed w-full z-40 top-0 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg pulse-icon">
+                        <i class="fa-solid fa-bolt text-xl"></i>
+                    </div>
+                    <span class="font-bold text-2xl text-gray-800 tracking-tight">Quick<span class="text-blue-600">Pay</span></span>
+                </div>
+                <div class="hidden md:flex space-x-6 items-center">
+                    <a href="#" class="text-gray-600 hover:text-blue-600 font-medium transition">Home</a>
+                    <a href="#services" class="text-gray-600 hover:text-blue-600 font-medium transition">Services</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600 font-medium transition">Offers</a>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium transition shadow-md hover:shadow-lg">
+                        Login / Sign Up
+                    </button>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-gray-600 hover:text-gray-900 focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div class="text-center mb-12 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+                Recharge & Pay Bills <br class="hidden md:block" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Instantly. Safely.</span>
+            </h1>
+            <p class="text-lg text-gray-500 max-w-2xl mx-auto">
+                Experience lightning-fast payments for all your daily needs. Mobile, DTH, Electricity, and more in just a few clicks.
+            </p>
+        </div>
+
+        <!-- Services Grid -->
+        <div id="services" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6 mb-12">
+            <!-- Mobile Prepaid -->
+            <div class="service-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer animate-slide-up" onclick="openPaymentModal('Mobile Prepaid', 'fa-mobile-screen')">
+                <div class="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mb-3 text-blue-600 text-2xl">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                </div>
+                <span class="font-medium text-gray-700 text-sm text-center">Mobile Prepaid</span>
+            </div>
+
+            <!-- DTH -->
+            <div class="service-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer animate-slide-up delay-100" onclick="openPaymentModal('DTH Recharge', 'fa-satellite-dish')">
+                <div class="w-14 h-14 bg-orange-50 rounded-full flex items-center justify-center mb-3 text-orange-500 text-2xl">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                </div>
+                <span class="font-medium text-gray-700 text-sm text-center">DTH</span>
+            </div>
+
+            <!-- Electricity -->
+            <div class="service-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer animate-slide-up delay-200" onclick="openPaymentModal('Electricity Bill', 'fa-lightbulb')">
+                <div class="w-14 h-14 bg-yellow-50 rounded-full flex items-center justify-center mb-3 text-yellow-500 text-2xl">
+                    <i class="fa-regular fa-lightbulb"></i>
+                </div>
+                <span class="font-medium text-gray-700 text-sm text-center">Electricity</span>
+            </div>
+
+            <!-- Broadband -->
+            <div class="service-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer animate-slide-up delay-300" onclick="openPaymentModal('Broadband Bill', 'fa-wifi')">
+                <div class="w-14 h-14 bg-purple-50 rounded-full flex items-center justify-center mb-3 text-purple-600 text-2xl">
+                    <i class="fa-solid fa-wifi"></i>
+                </div>
+                <span class="font-medium text-gray-700 text-sm text-center">Broadband</span>
+            </div>
+
+            <!-- Water -->
+            <div class="service-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer animate-slide-up delay-100" onclick="openPaymentModal('Water Bill', 'fa-droplet')">
+                <div class="w-14 h-14 bg-cyan-50 rounded-full flex items-center justify-center mb-3 text-cyan-500 text-2xl">
+                    <i class="fa-solid fa-droplet"></i>
+                </div>
+                <span class="font-medium text-gray-700 text-sm text-center">Water</span>
+            </div>
+
+            <!-- Gas Cylinder -->
+            <div class="service-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer animate-slide-up delay-200" onclick="openPaymentModal('Gas Cylinder Booking', 'fa-fire-flame-simple')">
+                <div class="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mb-3 text-red-500 text-2xl">
+                    <i class="fa-solid fa-fire-flame-simple"></i>
+                </div>
+                <span class="font-medium text-gray-700 text-sm text-center">Gas Cylinder</span>
+            </div>
+             <!-- Credit Card -->
+             <div class="service-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer animate-slide-up delay-300" onclick="openPaymentModal('Credit Card Bill', 'fa-credit-card')">
+                <div class="w-14 h-14 bg-indigo-50 rounded-full flex items-center justify-center mb-3 text-indigo-500 text-2xl">
+                    <i class="fa-regular fa-credit-card"></i>
+                </div>
+                <span class="font-medium text-gray-700 text-sm text-center">Credit Card</span>
+            </div>
+            
+            <!-- Fastag -->
+            <div class="service-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-pointer animate-slide-up delay-100" onclick="openPaymentModal('FASTag Recharge', 'fa-car-side')">
+                <div class="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mb-3 text-green-500 text-2xl">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <span class="font-medium text-gray-700 text-sm text-center">FASTag</span>
+            </div>
+        </div>
+
+        <!-- Promotional Banners -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up delay-300">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 right-0 opacity-20 transform translate-x-4 -translate-y-4">
+                    <i class="fa-solid fa-gift text-9xl"></i>
+                </div>
+                <div class="relative z-10">
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase mb-3 inline-block">Special Offer</span>
+                    <h3 class="text-2xl font-bold mb-2">Get 50% Cashback</h3>
+                    <p class="mb-4 text-blue-100">On your first electricity bill payment. Use code: ELEC50</p>
+                    <button class="bg-white text-blue-600 px-5 py-2 rounded-lg font-medium hover:bg-gray-50 transition" onclick="copyCode('ELEC50')">
+                        Copy Code <i class="fa-regular fa-copy ml-1"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 right-0 opacity-20 transform translate-x-4 -translate-y-4">
+                    <i class="fa-solid fa-mobile-screen text-9xl"></i>
+                </div>
+                <div class="relative z-10">
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase mb-3 inline-block">Mobile Recharge</span>
+                    <h3 class="text-2xl font-bold mb-2">Flat ₹50 Off</h3>
+                    <p class="mb-4 text-purple-100">On all mobile recharges above ₹299. Use code: MOB50</p>
+                    <button class="bg-white text-purple-600 px-5 py-2 rounded-lg font-medium hover:bg-gray-50 transition" onclick="copyCode('MOB50')">
+                        Copy Code <i class="fa-regular fa-copy ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 justify-center md:justify-start">
+                <i class="fa-solid fa-bolt text-blue-600 text-xl"></i>
+                <span class="font-bold text-xl text-gray-800">QuickPay</span>
+            </div>
+            <p class="text-gray-500 text-sm">© 2026 QuickPay Services. All rights reserved.</p>
+            <div class="flex gap-4 justify-center">
+                <a href="#" class="text-gray-400 hover:text-blue-600 transition"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#" class="text-gray-400 hover:text-pink-600 transition"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Generic Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div id="modalIconContainer" class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-600 text-3xl">
+                    <i id="modalIcon" class="fa-solid fa-mobile-screen"></i>
+                </div>
+                <h2 id="modalTitle" class="text-2xl font-bold text-gray-800">Mobile Recharge</h2>
+                <p class="text-gray-500 text-sm mt-1">Enter details to proceed securely</p>
+            </div>
+
+            <!-- Form Form -->
+            <form id="paymentForm" onsubmit="handlePayment(event)">
+                <div class="space-y-4">
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1" id="inputLabel1">Number / ID</label>
+                        <input type="text" id="inputId1" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-gray-50" placeholder="Enter Account/Mobile Number">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Operator / Board</label>
+                        <select required class="w-full px-4 py-3 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-gray-50">
+                             <option value="">Select Operator</option>
+                             <option value="jio">Jio</option>
+                             <option value="airtel">Airtel</option>
+                             <option value="vi">Vi</option>
+                             <option value="bsnl">BSNL</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 font-medium">₹</span>
+                            <input type="number" required min="10" class="w-full pl-8 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-gray-50" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="payButton" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex justify-center items-center h-12">
+                    <span id="payText">Proceed to Pay</span>
+                    <div id="payLoader" class="loader ml-2" style="border-width: 3px; width: 20px; height: 20px;"></div>
+                </button>
+            </form>
+
+            <!-- Success State (Hidden by default) -->
+            <div id="successState" class="hidden text-center py-4">
+                <i class="fa-regular fa-circle-check success-checkmark mx-auto mb-4 block"></i>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Payment Successful!</h3>
+                <p class="text-gray-500 text-sm mb-6">Your transaction has been processed successfully. A confirmation message has been sent.</p>
+                <button onclick="closeModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-6 rounded-lg transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification for Copying Code -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-green-400"></i>
+        <span id="toastMessage">Copied!</span>
+    </div>
+
+    <script>
+        // Modal Logic
+        const modal = document.getElementById('paymentModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalIcon = document.getElementById('modalIcon');
+        const inputLabel1 = document.getElementById('inputLabel1');
+        const inputId1 = document.getElementById('inputId1');
+        
+        const paymentForm = document.getElementById('paymentForm');
+        const successState = document.getElementById('successState');
+        const payButton = document.getElementById('payButton');
+        const payText = document.getElementById('payText');
+        const payLoader = document.getElementById('payLoader');
+
+        function openPaymentModal(serviceName, iconClass) {
+            // Reset state
+            paymentForm.reset();
+            paymentForm.style.display = 'block';
+            successState.style.display = 'none';
+            payText.style.display = 'block';
+            payLoader.style.display = 'none';
+            payButton.disabled = false;
+            payButton.classList.remove('opacity-75', 'cursor-not-allowed');
+
+            // Update modal content based on service clicked
+            modalTitle.textContent = serviceName;
+            modalIcon.className = `fa-solid ${iconClass}`;
+            
+            // Adjust input labels based on service type
+            if (serviceName.includes('Mobile')) {
+                inputLabel1.textContent = 'Mobile Number';
+                inputId1.placeholder = 'Enter 10 digit mobile number';
+                inputId1.type = 'tel';
+            } else if (serviceName.includes('DTH')) {
+                inputLabel1.textContent = 'Subscriber ID / Smart Card Number';
+                inputId1.placeholder = 'Enter ID';
+                inputId1.type = 'text';
+            } else if (serviceName.includes('Electricity')) {
+                inputLabel1.textContent = 'Consumer Number / CA Number';
+                inputId1.placeholder = 'Enter Consumer Number';
+                inputId1.type = 'text';
+            } else {
+                inputLabel1.textContent = 'Account ID / Registration Number';
+                inputId1.placeholder = 'Enter Details';
+                inputId1.type = 'text';
+            }
+
+            // Show modal
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Handle Form Submission (Simulating Payment)
+        function handlePayment(e) {
+            e.preventDefault();
+            
+            // UI changes for loading state
+            payText.style.display = 'none';
+            payLoader.style.display = 'block';
+            payButton.disabled = true;
+            payButton.classList.add('opacity-75', 'cursor-not-allowed');
+
+            // Simulate API call/processing time
+            setTimeout(() => {
+                // Hide form, show success
+                paymentForm.style.display = 'none';
+                successState.style.display = 'block';
+                document.querySelector('.success-checkmark').style.display = 'block';
+            }, 1500);
+        }
+
+        // Copy Code Functionality
+        function copyCode(code) {
+            // Try modern clipboard API first, fallback to execCommand for older browsers/iframes
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(code).then(() => {
+                    showToast(`Promo Code ${code} copied!`);
+                });
+            } else {
+                // Fallback approach
+                let textArea = document.createElement("textarea");
+                textArea.value = code;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast(`Promo Code ${code} copied!`);
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            
+            // Show toast
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+  </html>
