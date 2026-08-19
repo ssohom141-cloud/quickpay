@@ -453,9 +453,11 @@ if (serviceName.includes('Mobile')) {
         {value: 'bsnl', text: 'BSNL Broadband'}
     ];
 } else {
-    // Water, Gas, Credit Card, FASTag er jonno select box tai lukiye debo
-    operatorSelect.parentElement.style.display = 'none';
-    return; // ar niche jabena
+    // Water, Gas, Credit Card, FASTag
+    options = [
+        {value: '', text: 'Select Provider'}
+    ];
+    operatorSelect.parentElement.style.display = 'block';
 }
 
 // Option gulo add kora
